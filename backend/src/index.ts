@@ -1,14 +1,16 @@
 import express from "express";
 import "dotenv/config";
 import { connectDB } from "./db/connection.js";
-const app = express();
+import userRouter from "./routes/users.js";
+import { app } from "./app.js";
 const port = process.env.PORT;
 
-connectDB();
-app.get("/", (req, res) => {
-  res.send("Hola from Express + TypeScript!");
-});
-
-app.listen(port, () => {
-  console.log(`Server running on http://localhost:${port}`);
-});
+try {
+  await connectDB();
+  // see if app has error before listening
+  app.listen(port || 8000, () => {
+    console.log(`Server is running at ${port}`);
+  });
+} catch (error) {
+  console.error("Error connecting to db", error);
+}
