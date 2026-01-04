@@ -1,9 +1,10 @@
 // Instead of error we will perform throw new ApiErros and have a custom error class with all the required properties
 
 class ApiErrors extends Error {
-  status: number;
+  status?: number;
   errors?: string[];
   success?: boolean;
+
   constructor(status: number, message: string, errors = [], stack = "") {
     super(message);
     this.status = status;
@@ -17,5 +18,5 @@ class ApiErrors extends Error {
     }
   }
 }
-
+// success,message,error ,status
 export { ApiErrors };

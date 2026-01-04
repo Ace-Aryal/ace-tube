@@ -1,0 +1,9 @@
+GET at / with cookies undefined
+GET at / with cookies undefined
+GET at / with cookies undefined
+GET at / with cookies undefined
+GET at / with cookies undefined
+GET at / with cookies undefined
+GET at / with cookies undefined
+GET at / with cookies undefined
+GET at /logs.txt with cookies undefined

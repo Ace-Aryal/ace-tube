@@ -10,3 +10,7 @@
 // 7. you have to give extensions i do not know why, due to ts configs
 
 // ------------------------- Midddleware -------------------
+
+// --------------------------- JWT --------------------------
+// JWT is a bearer token : it is a token that is sent with every request to the server and it is used to authenticate the user ,
+//  any user who bears the token can access the server , this is done by using the middleware function that is called before the request is sent to the server
