@@ -1,9 +1,11 @@
-// this file just expors the express app instance
+// this file uses all middlewares and routes and exports app ------------------------------
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import express, { urlencoded } from "express";
 import { appendFile, appendFileSync } from "node:fs";
+
 const app = express();
+// custom middleware in app level
 app.use((req, res, next) => {
   appendFile(
     "logs.txt",
@@ -11,6 +13,7 @@ app.use((req, res, next) => {
     () => next()
   );
 });
+// 3rd party middlewares
 app.use(cors({ origin: process.env.CORS_ORIGIN, credentials: true }));
 // set the json body limit
 app.use(express.json({ limit: "16kb" }));
@@ -21,4 +24,10 @@ app.use(express.static("public"));
 // set the cookie parser
 
 app.use(cookieParser());
+
+// routes import
+import userRouter from "./routes/users.js";
+
+//routes decleration
+app.use("/api/v1/users", userRouter); // createas /users prefix to all the routes inside userRouter
 export { app };

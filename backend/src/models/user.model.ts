@@ -1,4 +1,5 @@
 import mongoose, {
+  CallbackWithoutResultAndOptionalError,
   DefaultSchemaOptions,
   Document,
   Schema,
@@ -69,6 +70,7 @@ const userSchema: Schema<IUser> = new Schema(
 );
 userSchema.plugin(mongooseAggregatePaginate);
 userSchema.pre("save", async function (this: IUser) {
+  // note: no need to call next in new version
   if (this.isModified("password")) {
     this.password = await bcrypt.hash(this.password, 10);
   }

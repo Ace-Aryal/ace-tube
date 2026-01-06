@@ -1,4 +1,4 @@
-import express from "express";
+// ------------------------ This file only connects to the database and starts the server -----------------------------------
 import "dotenv/config";
 import { connectDB } from "./db/connection.js";
 import userRouter from "./routes/users.js";

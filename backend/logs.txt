@@ -7,3 +7,7 @@ GET at / with cookies undefined
 GET at / with cookies undefined
 GET at / with cookies undefined
 GET at /logs.txt with cookies undefined
+POST at /api/v1/users/register with cookies undefined
+OPTIONS at /api/v1/users/register with cookies undefined
+POST at /api/v1/users/register with cookies undefined
+POST at /api/v1/users/register with cookies undefined

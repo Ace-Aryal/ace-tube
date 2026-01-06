@@ -1,6 +1,14 @@
 import { NextFunction, Request, RequestHandler, Response } from "express";
 const asyncHandler = (requestHandler: RequestHandler) => {
   return (req: Request, res: Response, next: NextFunction) =>
+    // When the router code runs at app startup,
+    // asyncHandler(cb) is executed and returns an Express middleware.
+    // Express stores this middleware for the route.
+    //
+    // Later, when a request matches the route,
+    // Express executes the returned middleware,
+    // which then calls the original async callback (cb).
+
     Promise.resolve(requestHandler(req, res, next)).catch((err) => next(err));
 };
 
