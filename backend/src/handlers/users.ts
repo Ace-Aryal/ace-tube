@@ -37,7 +37,7 @@
 // eg. ResponseBody : {users : User[]}
 // e.g. RequestBody : {email:string,password:string}
 // e.g. QueryParms : {limit:10,page:2}
-import { existsSync } from "node:fs";
+import { existsSync, unlinkSync } from "node:fs";
 import { UserModal } from "../models/user.model.js";
 import { ApiErrors } from "../utils/apiError.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
@@ -53,11 +53,27 @@ type UploadedFiles = {
   avatar?: UploadedFile[];
   coverImage?: UploadedFile[];
 };
-
+const unlinkImage = (path: string) => {
+  unlinkSync(path);
+};
 export const registerUser = asyncHandler(async (req, res) => {
+  try {
+  } catch (error) {}
   const body = req.body;
+  const files: UploadedFiles | undefined = req.files as
+    | UploadedFiles
+    | undefined;
+  const avatar = files?.avatar?.[0]?.path;
+  const coverImage = files?.coverImage?.[0]?.path;
+  if (!avatar) {
+    throw new ApiErrors(400, "Avatar is required");
+  }
   const { success, data, error } = createUserSchema.safeParse(body);
   if (!success) {
+    unlinkSync(avatar);
+    if (coverImage) {
+      unlinkSync(coverImage);
+    }
     throw new ApiErrors(400, error.message);
   }
   const { email, fullName, password, username } = data;
@@ -69,15 +85,9 @@ export const registerUser = asyncHandler(async (req, res) => {
     console.log(existingUser, "existing user");
     throw new ApiErrors(409, "User already exists");
   }
-  const files: UploadedFiles | undefined = req.files as
-    | UploadedFiles
-    | undefined;
+
   console.log(files, "files");
-  const avatar = files?.avatar?.[0]?.path;
-  const coverImage = files?.coverImage?.[0]?.path;
-  if (!avatar) {
-    throw new ApiErrors(400, "Avatar is required");
-  }
+
   const avatarExists = existsSync(avatar);
   if (!avatarExists) {
     throw new ApiErrors(400, "Avatar file does not exist");
@@ -87,12 +97,14 @@ export const registerUser = asyncHandler(async (req, res) => {
   const avatarUploadPromise = uploadToCloudinary(avatar);
   if (coverImage) {
     const coverImageExists = existsSync(coverImage);
+
     if (coverImageExists) {
       const coverImageUploadPromise = uploadToCloudinary(coverImage);
       const [avatarRes, coverImageRes] = await Promise.all([
         avatarUploadPromise,
         coverImageUploadPromise,
       ]);
+      console.log(avatarRes, coverImageRes, "image upload res");
       avatarUrl = avatarRes?.url || "";
       coverImageUrl = coverImageRes?.url || "";
     }
@@ -100,6 +112,14 @@ export const registerUser = asyncHandler(async (req, res) => {
     const avatarRes = await avatarUploadPromise;
     avatarUrl = avatarRes?.url || "";
   }
+  if (!avatarUrl) {
+    unlinkSync(avatar);
+    if (coverImage) {
+      unlinkSync(coverImage);
+    }
+    throw new ApiErrors(500, "Error uploading avatar");
+  }
+
   const createUserRes = await UserModal.create({
     fullName,
     username,
@@ -110,9 +130,14 @@ export const registerUser = asyncHandler(async (req, res) => {
   });
   const createdUser = await UserModal.findById(createUserRes._id);
   if (!createdUser) {
+    unlinkSync(avatar);
+    if (coverImage) {
+      unlinkSync(coverImage);
+    }
     throw new ApiErrors(500, "Error creating user");
   }
   const response = new ApiResponse(201, true, "User created", createdUser);
   res.status(201).json(response);
+
   // const coverImage = files?.find(file => file.f)
 });

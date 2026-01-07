@@ -6,7 +6,7 @@ export const createUserSchema = z.object({
     .string()
     .min(6)
     .regex(
-      /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{6,}$/,
+      /(?=.*[A-Za-z])(?=.*\d)/,
       "Password must be at least 6 characters long and contain at least one letter and one number."
     ),
   fullName: z.string().min(3),

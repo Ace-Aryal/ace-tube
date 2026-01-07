@@ -1,8 +1,7 @@
 import { v2 as cloudinary } from "cloudinary";
 import fs from "fs";
-import { loadEnvFile } from "process";
 cloudinary.config({
-  cloud_name: "ace-tube",
+  cloud_name: "dsdevazn9",
   api_secret: process.env.CLOUDINARY_SECRET,
   api_key: process.env.CLOUDINARY_API_KEY,
 });
@@ -20,6 +19,7 @@ export async function uploadToCloudinary(localeFilePath: string) {
 
     return uploadRes;
   } catch (error) {
+    console.error(error, "upload error");
     // remove the locally saved temporary file as the upload got failed
     fs.unlinkSync(localeFilePath);
     return;
