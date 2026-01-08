@@ -41,9 +41,10 @@ import { existsSync, unlinkSync } from "node:fs";
 import { UserModal } from "../models/user.model.js";
 import { ApiErrors } from "../utils/apiError.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
-import { createUserSchema } from "../validators/users.js";
+import { createUserSchema, loginUserSchema } from "../validators/users.js";
 import { uploadToCloudinary } from "../services/cloudinary.js";
 import { ApiResponse } from "../utils/apiResponse.js";
+import bcrypt from "bcryptjs";
 type UploadedFile = {
   filename?: string;
   path?: string;
@@ -56,10 +57,25 @@ type UploadedFiles = {
 const unlinkImage = (path: string) => {
   unlinkSync(path);
 };
+export const geneerateAccessAndRefreshTokens = async (userId: string) => {
+  try {
+    const user = await UserModal.findById(userId);
+    if (!user) {
+      throw new ApiErrors(500, "Errror fetching user");
+    }
+    const accessToken = user.generateAccessToken();
+    const refreshToken = user.generateRefreshToken();
+    return { accessToken, refreshToken };
+  } catch (error) {
+    console.error(error);
+    throw new ApiErrors(500, "Internal server error");
+  }
+};
 export const registerUser = asyncHandler(async (req, res) => {
   try {
   } catch (error) {}
   const body = req.body;
+  console.log(body, "body");
   const files: UploadedFiles | undefined = req.files as
     | UploadedFiles
     | undefined;
@@ -128,7 +144,9 @@ export const registerUser = asyncHandler(async (req, res) => {
     avatar: avatarUrl,
     coverImage: coverImageUrl,
   });
-  const createdUser = await UserModal.findById(createUserRes._id);
+  const createdUser = await UserModal.findById(createUserRes._id).select(
+    "-password -refreshToken"
+  );
   if (!createdUser) {
     unlinkSync(avatar);
     if (coverImage) {
@@ -140,4 +158,23 @@ export const registerUser = asyncHandler(async (req, res) => {
   res.status(201).json(response);
 
   // const coverImage = files?.find(file => file.f)
+});
+
+export const loginUser = asyncHandler(async (req, res) => {
+  const body = req.body;
+  const { success, data, error } = loginUserSchema.safeParse(body);
+  if (!success) {
+    throw new ApiErrors(400, error.message);
+  }
+  const { email, password, username } = data;
+  // OR operator is very good if you think about it
+  const user = await UserModal.findOne({ $or: [{ email }, { username }] });
+  if (!user) {
+    throw new ApiErrors(400, "No user exists with provided  ");
+  }
+  const isValidPassword = await user.isPasswordMatched(password);
+  if (!isValidPassword) {
+    throw new ApiErrors(401, "Invalid Credentials");
+  }
+  // refresh token generate gareara pathauni
 });

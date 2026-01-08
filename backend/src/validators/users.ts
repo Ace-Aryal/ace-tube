@@ -11,3 +11,14 @@ export const createUserSchema = z.object({
     ),
   fullName: z.string().min(3),
 });
+
+export const loginUserSchema = z
+  .object({
+    email: z.email().optional(),
+    username: z.string().optional(),
+    password: z.string().min(6),
+  })
+  .refine((data) => {
+    const { email, username } = data;
+    return email || username;
+  }, "Email or username is required");

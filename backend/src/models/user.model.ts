@@ -8,6 +8,12 @@ import mongoose, {
 import bcrypt from "bcryptjs";
 import mongooseAggregatePaginate from "mongoose-aggregate-paginate-v2";
 import jwt from "jsonwebtoken";
+export interface IUserMethods {
+  isPasswordMatched(candidate: string): Promise<boolean>;
+  generateAccessToken(): string;
+  generateRefreshToken(): string;
+}
+
 export interface IUser extends Document {
   username: string;
   email: string;
@@ -18,7 +24,7 @@ export interface IUser extends Document {
   password: string;
   refreshToken?: string;
 }
-const userSchema: Schema<IUser> = new Schema(
+const userSchema: Schema<IUser & IUserMethods> = new Schema(
   {
     username: {
       type: String,
