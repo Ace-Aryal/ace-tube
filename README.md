@@ -1,2 +1,2 @@
 # ace-tube
-small scale youtube clone to learn express.js backend
+small scale youtube backend clone to learn express.js backend
